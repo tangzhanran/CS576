@@ -11,7 +11,7 @@
 #include <cmath>
 
 // Constructor and Desctructors
-MyImage::MyImage() 
+MyImage::MyImage()
 {
 	Data = NULL;
 	Width = -1;
@@ -21,22 +21,22 @@ MyImage::MyImage()
 
 MyImage::~MyImage()
 {
-	if ( Data )
+	if (Data)
 		delete Data;
 }
 
 
 // Copy constructor
-MyImage::MyImage( MyImage *otherImage)
+MyImage::MyImage(MyImage *otherImage)
 {
 	Height = otherImage->Height;
-	Width  = otherImage->Width;
-	Data   = new char[Width*Height*3];
-	strcpy(otherImage->ImagePath, ImagePath );
+	Width = otherImage->Width;
+	Data = new char[Width*Height * 3];
+	strcpy(otherImage->ImagePath, ImagePath);
 
-	for ( int i=0; i<(Height*Width*3); i++ )
+	for (int i = 0; i < (Height*Width * 3); i++)
 	{
-		Data[i]	= otherImage->Data[i];
+		Data[i] = otherImage->Data[i];
 	}
 }
 
@@ -46,15 +46,15 @@ MyImage::MyImage( MyImage *otherImage)
 MyImage & MyImage::operator= (const MyImage &otherImage)
 {
 	Height = otherImage.Height;
-	Width  = otherImage.Width;
-	Data   = new char[Width*Height*3];
-	strcpy( (char *)otherImage.ImagePath, ImagePath );
+	Width = otherImage.Width;
+	Data = new char[Width*Height * 3];
+	strcpy((char *)otherImage.ImagePath, ImagePath);
 
-	for ( int i=0; i<(Height*Width*3); i++ )
+	for (int i = 0; i < (Height*Width * 3); i++)
 	{
-		Data[i]	= otherImage.Data[i];
+		Data[i] = otherImage.Data[i];
 	}
-	
+
 	return *this;
 
 }
@@ -62,75 +62,121 @@ MyImage & MyImage::operator= (const MyImage &otherImage)
 // MyImage::CreatImageCanv
 // Function to create white image with two dots connected
 bool MyImage::CreatImageCanv()
-{	
+{
 	// Allocate Data structure and copy
-	Data = new char[Width*Height*3];
+	Data = new char[Width*Height * 3]; //BGR Order
 	for (int i = 0; i < Height*Width; i++)
 	{
-		Data[3*i]	= 255;
-		Data[3*i+1]	= 255;
-		Data[3*i+2]	= 255;
+		Data[3 * i] = 255;
+		Data[3 * i + 1] = 255;
+		Data[3 * i + 2] = 255;
 	}
 
 	// two coordinates to connect a line, x is for height, y is for row
-    int x1 = 200, y1 = 400;
-    int x2 = 10, y2 = 200;
+	int x1 = 0, y1 = 0;
+	int x2 = 0, y2 = 511;
+	int x3 = 511, y3 = 511;
+	int x4 = 511, y4 = 0;
+	int x5 = 0, y5 = 767;
+	int x6 = 511, y6 = -256;
+	DrawLine(x1, y1, x2, y2);
+	DrawLine(x2, y2, x3, y3);
+	DrawLine(x3, y3, x4, y4);
+	DrawLine(x4, y4, x1, y1);
+	DrawLine(x5, y5, x6, y6);
 
-    int start_x = x1, start_y = y1, end_x = x2, end_y = y2;
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-    double slope = 0;
-    
-    bool anchor_x;
-    if(dx != 0) slope = dy/(double)dx;
+	return true;
+}
 
-	if(abs(slope) <= 1 && dx !=0) {
-    	anchor_x = true;
-    	if(dx < 0) {
-    		start_x = x2;
-    		start_y = y2;
-    		end_x = x1;
-    		end_y = y1;
-    	}
-    	slope = (end_y - start_y)/(double)(end_x - start_x);
-    }
-    else {
-    	anchor_x = false;
-    	if(dy < 0) {
-    		start_x = x2;
-    		start_y = y2;
-    		end_x = x1;
-    		end_y = y1;
-    	}
-    	if(dx == 0) {slope = 0;}
-    	else {slope = (end_x - start_x)/(double)(end_y - start_y);}
-    }
+bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
+{
+	int start_x = x1, start_y = y1, end_x = x2, end_y = y2;
+	int dx = x2 - x1;
+	int dy = y2 - y1;
+	double slope = 0;
 
-	// set starting point to zero first
-	Data[start_y*Width*3 + start_x*3] = 0;
-	Data[start_y*Width*3 + start_x*3 + 1] = 0;
-	Data[start_y*Width*3 + start_x*3 + 2] = 0;
-	
-	if(anchor_x) {
+	bool anchor_x;		//True if -1<=slope<=1, False if slope >1 or slope<-1
+	if (dx != 0)
+		slope = dy / (double)dx;
+
+	if (abs(slope) <= 1 && dx != 0)
+	{
+		anchor_x = true;
+		if (dx < 0)		//make dx always be positive
+		{
+			start_x = x2;
+			start_y = y2;
+			end_x = x1;
+			end_y = y1;
+		}
+		slope = (end_y - start_y) / (double)(end_x - start_x);
+	}
+	else 
+	{
+		anchor_x = false;
+		if (dy < 0)		//make dy always be positive
+		{
+			start_x = x2;
+			start_y = y2;
+			end_x = x1;
+			end_y = y1;
+		}
+		if (dx == 0) 
+		{ 
+			slope = 0; 
+		}
+		else 
+		{ 
+			slope = (end_x - start_x) / (double)(end_y - start_y); 
+		}
+	}
+
+	if (anchor_x) 
+	{
+		if (start_x < 0)
+		{
+			if (slope != 0)
+				start_y -= start_x * slope;				
+			start_x = 0;
+		}
+		if (end_x > 511)
+			end_x = 511;
 		double y = start_y + 0.5;
-		for(int x = start_x + 1; x <= end_x; x++) {
+		for (int x = start_x + 1; x <= end_x; x++) 
+		{
 			y = y + slope;
 			int int_y = (int)floor(y);
-			Data[int_y*Width*3 + x*3] = 0;
-			Data[int_y*Width*3 + x*3 + 1] = 0;
-			Data[int_y*Width*3 + x*3 + 2] = 0;
+			Data[int_y*Width * 3 + x * 3] = 0;
+			Data[int_y*Width * 3 + x * 3 + 1] = 0;
+			Data[int_y*Width * 3 + x * 3 + 2] = 0;
 		}
 	}
-	else {
+	else 
+	{
+		if (start_y < 0)
+		{
+			if (slope != 0)
+				start_x -= start_y * slope;
+			start_y = 0;
+		}
+		if (end_y > 511)
+			end_y = 511;
 		double x = start_x + 0.5;
-		for(int y = start_y + 1; y <= end_y; y++) {
+		for (int y = start_y + 1; y <= end_y; y++) 
+		{
 			x = x + slope;
 			int int_x = (int)floor(x);
-			Data[y*Width*3 + int_x*3] = 0;
-			Data[y*Width*3 + int_x*3 + 1] = 0;
-			Data[y*Width*3 + int_x*3 + 2] = 0;
+			Data[y*Width * 3 + int_x * 3] = 0;
+			Data[y*Width * 3 + int_x * 3 + 1] = 0;
+			Data[y*Width * 3 + int_x * 3 + 2] = 0;
 		}
 	}
+
+	// set starting point to zero first
+	Data[start_y*Width * 3 + start_x * 3] = 0;
+	Data[start_y*Width * 3 + start_x * 3 + 1] = 0;
+	Data[start_y*Width * 3 + start_x * 3 + 2] = 0;
+
 	return true;
 }
 
@@ -140,17 +186,17 @@ bool MyImage::ReadImage()
 {
 
 	// Verify ImagePath
-	if (ImagePath[0] == 0 || Width < 0 || Height < 0 )
+	if (ImagePath[0] == 0 || Width < 0 || Height < 0)
 	{
 		fprintf(stderr, "Image or Image properties not defined");
 		fprintf(stderr, "Usage is `Image.exe Imagefile w h`");
 		return false;
 	}
-	
+
 	// Create a valid output file pointer
 	FILE *IN_FILE;
 	IN_FILE = fopen(ImagePath, "rb");
-	if ( IN_FILE == NULL ) 
+	if (IN_FILE == NULL)
 	{
 		fprintf(stderr, "Error Opening File for Reading");
 		return false;
@@ -158,30 +204,30 @@ bool MyImage::ReadImage()
 
 	// Create and populate RGB buffers
 	int i;
-	char *Rbuf = new char[Height*Width]; 
-	char *Gbuf = new char[Height*Width]; 
-	char *Bbuf = new char[Height*Width]; 
+	char *Rbuf = new char[Height*Width];
+	char *Gbuf = new char[Height*Width];
+	char *Bbuf = new char[Height*Width];
 
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		Rbuf[i] = fgetc(IN_FILE);
 	}
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		Gbuf[i] = fgetc(IN_FILE);
 	}
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		Bbuf[i] = fgetc(IN_FILE);
 	}
-	
+
 	// Allocate Data structure and copy
-	Data = new char[Width*Height*3];
+	Data = new char[Width*Height * 3];
 	for (i = 0; i < Height*Width; i++)
 	{
-		Data[3*i]	= Bbuf[i];
-		Data[3*i+1]	= Gbuf[i];
-		Data[3*i+2]	= Rbuf[i];
+		Data[3 * i] = Bbuf[i];
+		Data[3 * i + 1] = Gbuf[i];
+		Data[3 * i + 2] = Rbuf[i];
 	}
 
 	// Clean up and return
@@ -201,16 +247,16 @@ bool MyImage::WriteImage()
 {
 	// Verify ImagePath
 	// Verify ImagePath
-	if (ImagePath[0] == 0 || Width < 0 || Height < 0 )
+	if (ImagePath[0] == 0 || Width < 0 || Height < 0)
 	{
 		fprintf(stderr, "Image or Image properties not defined");
 		return false;
 	}
-	
+
 	// Create a valid output file pointer
 	FILE *OUT_FILE;
 	OUT_FILE = fopen(ImagePath, "wb");
-	if ( OUT_FILE == NULL ) 
+	if (OUT_FILE == NULL)
 	{
 		fprintf(stderr, "Error Opening File for Writing");
 		return false;
@@ -218,32 +264,32 @@ bool MyImage::WriteImage()
 
 	// Create and populate RGB buffers
 	int i;
-	char *Rbuf = new char[Height*Width]; 
-	char *Gbuf = new char[Height*Width]; 
-	char *Bbuf = new char[Height*Width]; 
+	char *Rbuf = new char[Height*Width];
+	char *Gbuf = new char[Height*Width];
+	char *Bbuf = new char[Height*Width];
 
 	for (i = 0; i < Height*Width; i++)
 	{
-		Bbuf[i] = Data[3*i];
-		Gbuf[i] = Data[3*i+1];
-		Rbuf[i] = Data[3*i+2];
+		Bbuf[i] = Data[3 * i];
+		Gbuf[i] = Data[3 * i + 1];
+		Rbuf[i] = Data[3 * i + 2];
 	}
 
-	
+
 	// Write data to file
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		fputc(Rbuf[i], OUT_FILE);
 	}
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		fputc(Gbuf[i], OUT_FILE);
 	}
-	for (i = 0; i < Width*Height; i ++)
+	for (i = 0; i < Width*Height; i++)
 	{
 		fputc(Bbuf[i], OUT_FILE);
 	}
-	
+
 	// Clean up and return
 	delete Rbuf;
 	delete Gbuf;
@@ -263,12 +309,12 @@ bool MyImage::Modify()
 {
 
 	// TO DO by student
-	
+
 	// sample operation
-	for ( int i=0; i<Width*Height; i++ )
+	for (int i = 0; i < Width*Height; i++)
 	{
-		Data[3*i] = 0;
-		Data[3*i+1] = 0;
+		Data[3 * i] = 0;
+		Data[3 * i + 1] = 0;
 	}
 
 	return false;

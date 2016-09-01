@@ -61,6 +61,7 @@ public:
 	bool	ReadImage();
 	bool	WriteImage();
 	bool    CreatImageCanv();
+	bool	DrawLine(int sx, int sy, int ex, int ey);
 	// Modifications
 	bool	Modify();
 
