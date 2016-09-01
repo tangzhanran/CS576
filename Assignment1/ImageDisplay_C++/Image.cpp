@@ -10,6 +10,8 @@
 #include "Image.h"
 #include <cmath>
 
+#define PI 3.1415926
+
 // Constructor and Desctructors
 MyImage::MyImage()
 {
@@ -72,18 +74,48 @@ bool MyImage::CreatImageCanv()
 		Data[3 * i + 2] = 255;
 	}
 
-	// two coordinates to connect a line, x is for height, y is for row
+	// vertices of the square
 	int x1 = 0, y1 = 0;
-	int x2 = 0, y2 = 511;
-	int x3 = 511, y3 = 511;
-	int x4 = 511, y4 = 0;
-	int x5 = 0, y5 = 767;
-	int x6 = 511, y6 = -256;
+	int x2 = 0, y2 = Width-1;
+	int x3 = Width - 1, y3 = Height - 1;
+	int x4 = Width - 1, y4 = 0;
 	DrawLine(x1, y1, x2, y2);
 	DrawLine(x2, y2, x3, y3);
 	DrawLine(x3, y3, x4, y4);
 	DrawLine(x4, y4, x1, y1);
-	DrawLine(x5, y5, x6, y6);
+
+	int n = 16;
+	double exrad = 2 * PI / n;
+	double rad = 0;
+	int sx = Width/2-1 , sy = Height/2-1;
+	int ex = Width/2-1, ey = 0;
+	DrawLine(sx, sy, ex, ey);
+	while (n > 0)
+	{
+		if ((rad <= (0.25 * PI)) || (rad >= (1.75 * PI)))
+		{
+			ex = sx + Height / 2 * tan(rad);
+			ey = 0;
+		}
+		else if (rad <= (0.75 * PI))
+		{
+			ex = Width - 1;
+			ey = sy - Width / 2 * tan(0.5*PI - rad);
+		}
+		else if (rad <= (1.25 * PI))
+		{
+			ex = sx - Height / 2 * tan(rad);
+			ey = 511;
+		}
+		else if (rad <= (1.75 * PI))
+		{
+			ex = 0;
+			ey = sy + Width / 2 * tan(1.5*PI - rad);
+		}
+		DrawLine(sx, sy, ex, ey);
+		rad += exrad;
+		n--;
+	}
 
 	return true;
 }
