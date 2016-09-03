@@ -60,10 +60,10 @@ public:
 	// Input Output operations
 	bool	ReadImage();
 	bool	WriteImage();
-	bool    CreatImageCanv();
+	bool    CreatImageCanv(int n);
 	bool	DrawLine(int sx, int sy, int ex, int ey);
 	// Modifications
-	bool	Modify();
+	bool	Modify(const MyImage &origin_image, double scale);
 
 };
 

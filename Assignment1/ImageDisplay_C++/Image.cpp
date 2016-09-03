@@ -63,7 +63,7 @@ MyImage & MyImage::operator= (const MyImage &otherImage)
 
 // MyImage::CreatImageCanv
 // Function to create white image with two dots connected
-bool MyImage::CreatImageCanv()
+bool MyImage::CreatImageCanv(int n)
 {
 	// Allocate Data structure and copy
 	Data = new char[Width*Height * 3]; //BGR Order
@@ -84,7 +84,6 @@ bool MyImage::CreatImageCanv()
 	DrawLine(x3, y3, x4, y4);
 	DrawLine(x4, y4, x1, y1);
 
-	int n = 16;
 	double exrad = 2 * PI / n;
 	double rad = 0;
 	int sx = Width/2-1 , sy = Height/2-1;
@@ -105,7 +104,7 @@ bool MyImage::CreatImageCanv()
 		else if (rad <= (1.25 * PI))
 		{
 			ex = sx - Height / 2 * tan(rad);
-			ey = 511;
+			ey = Height - 1;
 		}
 		else if (rad <= (1.75 * PI))
 		{
@@ -165,14 +164,14 @@ bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
 
 	if (anchor_x) 
 	{
-		if (start_x < 0)
+		/*if (start_x < 0)
 		{
 			if (slope != 0)
 				start_y -= start_x * slope;				
 			start_x = 0;
 		}
-		if (end_x > 511)
-			end_x = 511;
+		if (end_x > Width-1)
+			end_x = Width;*/
 		double y = start_y + 0.5;
 		for (int x = start_x + 1; x <= end_x; x++) 
 		{
@@ -185,14 +184,14 @@ bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
 	}
 	else 
 	{
-		if (start_y < 0)
+		/*if (start_y < 0)
 		{
 			if (slope != 0)
 				start_x -= start_y * slope;
 			start_y = 0;
 		}
 		if (end_y > 511)
-			end_y = 511;
+			end_y = 511*/;
 		double x = start_x + 0.5;
 		for (int y = start_y + 1; y <= end_y; y++) 
 		{
@@ -337,16 +336,36 @@ bool MyImage::WriteImage()
 
 // Here is where you would place your code to modify an image
 // eg Filtering, Transformation, Cropping, etc.
-bool MyImage::Modify()
+bool MyImage::Modify(const MyImage &img, double scale)
 {
+	/*int oriw = Width;
+	int orih = Height;
+	double scale = 2.0;
+	Width = Width / scale;
+	Height = Height / scale;*/
+	int oriw = img.Width;
+	int orih = img.Height;
+	Width = oriw / scale;
+	Height = orih / scale;
+	Data = new char[Width*Height * 3];
 
-	// TO DO by student
-
-	// sample operation
-	for (int i = 0; i < Width*Height; i++)
+	//int s = (Height / 2 - 1)*Width*scale + (Width / 2 - 1);
+	int i = 0, s = 0, cl = 0, ch = 0;
+	while (s < Width*Height)
 	{
-		Data[3 * i] = 0;
-		Data[3 * i + 1] = 0;
+		Data[3 * s] = img.Data[3*i];
+		Data[3 * s + 1] = img.Data[3*i+1];
+		Data[3 * s + 2] = img.Data[3*i+2];
+		s++;
+		cl++;
+		if (cl >= Width)
+		{
+			ch += scale;
+			cl = 0;
+			i = ch * oriw;
+		}
+		else
+			i += scale;		
 	}
 
 	return false;

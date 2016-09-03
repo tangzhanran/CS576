@@ -15,12 +15,14 @@
 #include "Image.h"
 
 #define MAX_LOADSTRING 100
+#define NUMOFLINES 100
 
 // Global Variables:
 MyImage			inImage, outImage;				// image objects
 HINSTANCE		hInst;							// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// The title bar text
+double scale = 2.5;
 
 // Foward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -53,13 +55,20 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	else
 	{
 		inImage.setImagePath(ImagePath);
-		if ( !inImage.CreatImageCanv() )
+		if (!inImage.CreatImageCanv(NUMOFLINES))
 		{ 
 			AfxMessageBox( "Could not create image\nUsage - Image.exe image.rgb w h");
 			//return FALSE;
 		}
-		else
-			outImage = inImage;
+		else			
+		{
+			/*outImage.setWidth(w / 2);
+			outImage.setHeight(h / 2);
+			outImage.setImagePath(ImagePath);
+			outImage.CreatImageCanv();*/
+			//outImage = inImage;
+			//outImage = inImage;			
+		}
 	}
 
 	// Initialize global strings
@@ -190,8 +199,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case IDM_ABOUT:
 				   DialogBox(hInst, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
 				   break;
-				case ID_MODIFY_IMAGE:
-				   outImage.Modify();
+				case ID_MODIFY_IMAGE:					
+				   outImage.Modify(inImage, scale);
 				   InvalidateRect(hWnd, &rt, false); 
 				   break;
 				case IDM_EXIT:
@@ -222,15 +231,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				bmi.bmiHeader.biCompression = BI_RGB;
 				bmi.bmiHeader.biSizeImage = inImage.getWidth()*inImage.getHeight();
 
+				BITMAPINFO o_bmi;
+				CBitmap o_bitmap;
+				memset(&o_bmi, 0, sizeof(o_bmi));
+				o_bmi.bmiHeader.biSize = sizeof(o_bmi.bmiHeader);
+				o_bmi.bmiHeader.biWidth = outImage.getWidth();
+				o_bmi.bmiHeader.biHeight = -outImage.getHeight();  // Use negative height.  DIB is top-down.
+				o_bmi.bmiHeader.biPlanes = 1;
+				o_bmi.bmiHeader.biBitCount = 24;
+				o_bmi.bmiHeader.biCompression = BI_RGB;
+				o_bmi.bmiHeader.biSizeImage = outImage.getWidth()*outImage.getHeight();
+
+
 				SetDIBitsToDevice(hdc,
 								  0,100,inImage.getWidth(),inImage.getHeight(),
 								  0,0,0,inImage.getHeight(),
 								  inImage.getImageData(),&bmi,DIB_RGB_COLORS);
 
 				SetDIBitsToDevice(hdc,
-								  outImage.getWidth()+50,100,outImage.getWidth(),outImage.getHeight(),
+								  inImage.getWidth()+50,100,outImage.getWidth(),outImage.getHeight(),
 								  0,0,0,outImage.getHeight(),
-								  outImage.getImageData(),&bmi,DIB_RGB_COLORS);
+								  outImage.getImageData(),&o_bmi,DIB_RGB_COLORS);
+
+				/*SetDIBitsToDevice(hdc,
+					512 + 50, 100, 256, 256,
+					0, 0, 0, outImage.getHeight(),
+					outImage.getImageData(), &bmi, DIB_RGB_COLORS);*/
 
 
 				EndPaint(hWnd, &ps);
