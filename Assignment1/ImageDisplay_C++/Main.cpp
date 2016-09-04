@@ -22,7 +22,8 @@ MyImage			inImage, outImage;				// image objects
 HINSTANCE		hInst;							// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// The title bar text
-double scale = 2.5;
+double scale = 2.0;
+bool alias = true;
 
 // Foward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -200,7 +201,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				   DialogBox(hInst, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
 				   break;
 				case ID_MODIFY_IMAGE:					
-				   outImage.Modify(inImage, scale);
+				   outImage.Modify(inImage, scale, alias);
 				   InvalidateRect(hWnd, &rt, false); 
 				   break;
 				case IDM_EXIT:

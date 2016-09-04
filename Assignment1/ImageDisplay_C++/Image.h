@@ -63,7 +63,8 @@ public:
 	bool    CreatImageCanv(int n);
 	bool	DrawLine(int sx, int sy, int ex, int ey);
 	// Modifications
-	bool	Modify(const MyImage &origin_image, double scale);
+	bool	Modify(MyImage origin_image, double scale, bool alias);
+	int* AliasingMean(int pixel_i, int pixel_j);
 
 };
 

@@ -336,8 +336,9 @@ bool MyImage::WriteImage()
 
 // Here is where you would place your code to modify an image
 // eg Filtering, Transformation, Cropping, etc.
-bool MyImage::Modify(const MyImage &img, double scale)
+bool MyImage::Modify(MyImage img, double scale, bool alias)
 {
+	//bool alias = true;
 	/*int oriw = Width;
 	int orih = Height;
 	double scale = 2.0;
@@ -350,23 +351,75 @@ bool MyImage::Modify(const MyImage &img, double scale)
 	Data = new char[Width*Height * 3];
 
 	//int s = (Height / 2 - 1)*Width*scale + (Width / 2 - 1);
-	int i = 0, s = 0, cl = 0, ch = 0;
-	while (s < Width*Height)
+//	int i = 0, s = 0, cl = 0, ch = 0;
+	if (!alias)
 	{
-		Data[3 * s] = img.Data[3*i];
-		Data[3 * s + 1] = img.Data[3*i+1];
-		Data[3 * s + 2] = img.Data[3*i+2];
-		s++;
-		cl++;
-		if (cl >= Width)
+		int orii = 1;
+		for (int i = 1; i < Width - 1; i++)
 		{
-			ch += scale;
-			cl = 0;
-			i = ch * oriw;
+			int orij = 1;
+			for (int j = 1; j < Height - 1; j++)
+			{
+				Data[(i*Width + j) * 3] = img.Data[(orii*oriw + orij) * 3];
+				Data[(i*Width + j) * 3 + 1] = img.Data[(orii*oriw + orij) * 3 + 1];
+				Data[(i*Width + j) * 3 + 2] = img.Data[(orii*oriw + orij) * 3 + 2];
+				orij += scale;
+			}
+			orii += scale;
 		}
-		else
-			i += scale;		
+		/*while (s < Width*Height)
+		{
+			Data[3 * s] = img.Data[3 * i];
+			Data[3 * s + 1] = img.Data[3 * i + 1];
+			Data[3 * s + 2] = img.Data[3 * i + 2];
+			s++;
+			cl++;
+			if (cl >= Width)
+			{
+				ch += scale;
+				cl = 0;
+				i = ch * oriw;
+			}
+			else
+				i += scale;
+		}*/
+		DrawLine(Width - 1, 0, Width - 1, Height - 1);
+		DrawLine(0, Width - 1, Width - 1, Height - 1);
+		DrawLine(0, 0, Width - 1, 0);
+		DrawLine(0, 0, 0, Height - 1);
+	}
+	else
+	{
+		int orii = 1;
+		for (int i = 1; i < Width - 1; i++)
+		{
+			int orij = 1;
+			for (int j = 1; j < Height - 1; j++)
+			{
+				/*Data[(i*Width + j) * 3] = img.Data[(orii*oriw + orij) * 3];
+				Data[(i*Width + j) * 3 + 1] = img.Data[(orii*oriw + orij) * 3 + 1];
+				Data[(i*Width + j) * 3 + 2] = img.Data[(orii*oriw + orij) * 3 + 2];*/
+				Data[(i*Width + j) * 3] = img.AliasingMean(orii, orij)[0];
+				Data[(i*Width + j) * 3 + 1] = img.AliasingMean(orii, orij)[1];
+				Data[(i*Width + j) * 3 + 2] = img.AliasingMean(orii, orij)[2];
+				orij += scale;
+			}
+			orii += scale;
+		}
 	}
 
 	return false;
+}
+
+int* MyImage::AliasingMean(int pixel_i, int pixel_j)
+{
+	int mean[3];
+	for (int i = 0; i < 3; i++)
+	{
+		mean[i] = (Data[(pixel_i*Width + pixel_j) * 3 + i] + Data[(pixel_i*Width + (pixel_j - 1)) * 3 + i] + Data[(pixel_i*Width + (pixel_j + 1)) * 3 + i] +
+			Data[((pixel_i - 1)*Width + (pixel_j - 1)) * 3 + i] + Data[((pixel_i - 1)*Width + pixel_j) * 3 + i] + Data[((pixel_i - 1)*Width + (pixel_j + 1)) * 3 + i] +
+			Data[((pixel_i + 1)*Width + (pixel_j - 1)) * 3 + i] + Data[((pixel_i + 1)*Width + pixel_j) * 3 + i] + Data[((pixel_i + 1)*Width + (pixel_j + 1)) * 3 + i]) / 9;
+	}
+
+	return mean;
 }
