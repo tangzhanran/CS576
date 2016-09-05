@@ -23,7 +23,9 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <vector>
 
+using namespace std;
 
 // Class structure of Image 
 // Use to encapsulate an RGB image
@@ -35,6 +37,9 @@ private:
 	int		Height;					// Height of Image
 	char	ImagePath[_MAX_PATH];	// Image location
 	char*	Data;					// RGB data of the image
+	//vector<pair<int, int>> endpoints;
+	//pair<int, int> startpoint;
+	double startrad;
 
 public:
 	// Constructor
@@ -56,6 +61,8 @@ public:
 	int		getHeight() { return Height; };
 	char*	getImageData() { return Data; };
 	char*	getImagePath() { return ImagePath; }
+	void	clearData();
+	void	pushPoints(int x, int y);
 
 	// Input Output operations
 	bool	ReadImage();
@@ -65,6 +72,7 @@ public:
 	// Modifications
 	bool	Modify(MyImage origin_image, double scale, bool alias);
 	int* AliasingMean(int pixel_i, int pixel_j);
+	void RotateImage(double rad, int n);
 
 };
 

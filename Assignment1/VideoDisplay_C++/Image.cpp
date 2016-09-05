@@ -19,6 +19,7 @@ MyImage::MyImage()
 	Width = -1;
 	Height = -1;
 	ImagePath[0] = 0;
+	startrad = 0.0;
 }
 
 MyImage::~MyImage()
@@ -35,6 +36,7 @@ MyImage::MyImage(MyImage *otherImage)
 	Width = otherImage->Width;
 	Data = new char[Width*Height * 3];
 	strcpy(otherImage->ImagePath, ImagePath);
+	//endpoints = otherImage->endpoints;
 
 	for (int i = 0; i < (Height*Width * 3); i++)
 	{
@@ -51,6 +53,7 @@ MyImage & MyImage::operator= (const MyImage &otherImage)
 	Width = otherImage.Width;
 	Data = new char[Width*Height * 3];
 	strcpy((char *)otherImage.ImagePath, ImagePath);
+	//endpoints = otherImage.endpoints;
 
 	for (int i = 0; i < (Height*Width * 3); i++)
 	{
@@ -87,8 +90,10 @@ bool MyImage::CreatImageCanv(int n)
 	double exrad = 2 * PI / n;
 	double rad = 0;
 	int sx = Width/2-1 , sy = Height/2-1;
+	//startpoint.first = sx;
+	//startpoint.second = sy;
+	//pushPoints(sx, sy);
 	int ex = Width/2-1, ey = 0;
-	DrawLine(sx, sy, ex, ey);
 	while (n > 0)
 	{
 		if ((rad <= (0.25 * PI)) || (rad >= (1.75 * PI)))
@@ -112,6 +117,7 @@ bool MyImage::CreatImageCanv(int n)
 			ey = sy + Width / 2 * tan(1.5*PI - rad);
 		}
 		DrawLine(sx, sy, ex, ey);
+		//pushPoints(ex, ey);
 		rad += exrad;
 		n--;
 	}
@@ -164,14 +170,14 @@ bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
 
 	if (anchor_x) 
 	{
-		/*if (start_x < 0)
+		if (start_x < 0)
 		{
 			if (slope != 0)
 				start_y -= start_x * slope;				
 			start_x = 0;
 		}
 		if (end_x > Width-1)
-			end_x = Width;*/
+			end_x = Width-1;
 		double y = start_y + 0.5;
 		for (int x = start_x + 1; x <= end_x; x++) 
 		{
@@ -184,14 +190,14 @@ bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
 	}
 	else 
 	{
-		/*if (start_y < 0)
+		if (start_y < 0)
 		{
 			if (slope != 0)
 				start_x -= start_y * slope;
 			start_y = 0;
 		}
-		if (end_y > 511)
-			end_y = 511*/;
+		if (end_y > Height-1)
+			end_y = Height-1;
 		double x = start_x + 0.5;
 		for (int y = start_y + 1; y <= end_y; y++) 
 		{
@@ -209,6 +215,16 @@ bool MyImage::DrawLine(int x1, int y1, int x2, int y2)
 	Data[start_y*Width * 3 + start_x * 3 + 2] = 0;
 
 	return true;
+}
+
+void MyImage::clearData()
+{
+	for (int i = 0; i < Height*Width; i++)
+	{
+		Data[3 * i] = 255;
+		Data[3 * i + 1] = 255;
+		Data[3 * i + 2] = 255;
+	}
 }
 
 // MyImage::ReadImage
@@ -422,4 +438,46 @@ int* MyImage::AliasingMean(int pixel_i, int pixel_j)
 	}
 
 	return mean;
+}
+
+void MyImage::RotateImage(double rad, int n)
+{
+	double exrad = 2 * PI / n;
+	rad += startrad;
+	if (rad > 2 * PI)
+		rad = rad - 2 * PI;
+	startrad = rad;
+	clearData();
+	int sx, sy, ex, ey;
+	sx = Width / 2 - 1;
+	sy = Height / 2 - 1;
+	while (n > 0)
+	{
+		if (rad > 2 * PI)
+			rad = rad - 2 * PI;
+		if ((rad <= (0.25 * PI)) || (rad >= (1.75 * PI)))
+		{
+			ex = sx + Height / 2 * tan(rad);
+			ey = 0;
+		}
+		else if (rad <= (0.75 * PI))
+		{
+			ex = Width - 1;
+			ey = sy - Width / 2 * tan(0.5*PI - rad);
+		}
+		else if (rad <= (1.25 * PI))
+		{
+			ex = sx - Height / 2 * tan(rad);
+			ey = Height - 1;
+		}
+		else if (rad <= (1.75 * PI))
+		{
+			ex = 0;
+			ey = sy + Width / 2 * tan(1.5*PI - rad);
+		}
+		DrawLine(sx, sy, ex, ey);
+		//pushPoints(ex, ey);
+		rad += exrad;
+		n--;
+	}
 }

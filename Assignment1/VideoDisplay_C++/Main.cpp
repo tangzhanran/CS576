@@ -15,7 +15,9 @@
 #include "Image.h"
 
 #define MAX_LOADSTRING 100
-#define NUMOFLINES 100
+#define NUMOFLINES 8
+
+using namespace std;
 
 // Global Variables:
 MyImage			inImage, outImage;				// image objects
@@ -30,8 +32,6 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
-
-
 
 // Main entry point for a windows application
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -242,22 +242,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				o_bmi.bmiHeader.biBitCount = 24;
 				o_bmi.bmiHeader.biCompression = BI_RGB;
 				o_bmi.bmiHeader.biSizeImage = outImage.getWidth()*outImage.getHeight();
-
-
-				SetDIBitsToDevice(hdc,
-								  0,100,inImage.getWidth(),inImage.getHeight(),
-								  0,0,0,inImage.getHeight(),
-								  inImage.getImageData(),&bmi,DIB_RGB_COLORS);
-
+			
+				while (1)
+				{
+					SetDIBitsToDevice(hdc,
+						0, 100, inImage.getWidth(), inImage.getHeight(),
+						0, 0, 0, inImage.getHeight(),
+						inImage.getImageData(), &bmi, DIB_RGB_COLORS);
+					inImage.RotateImage(0.062831852, NUMOFLINES);
+					//Sleep(100);
+				}
+				
 				SetDIBitsToDevice(hdc,
 								  inImage.getWidth()+50,100,outImage.getWidth(),outImage.getHeight(),
 								  0,0,0,outImage.getHeight(),
 								  outImage.getImageData(),&o_bmi,DIB_RGB_COLORS);
 
-				/*SetDIBitsToDevice(hdc,
-					512 + 50, 100, 256, 256,
-					0, 0, 0, outImage.getHeight(),
-					outImage.getImageData(), &bmi, DIB_RGB_COLORS);*/
 
 
 				EndPaint(hWnd, &ps);
@@ -293,5 +293,6 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
     return FALSE;
 }
+
 
 
