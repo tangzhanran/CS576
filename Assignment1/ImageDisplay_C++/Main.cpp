@@ -15,14 +15,14 @@
 #include "Image.h"
 
 #define MAX_LOADSTRING 100
-#define NUMOFLINES 100
+#define NUMOFLINES 8
 
 // Global Variables:
 MyImage			inImage, outImage;				// image objects
 HINSTANCE		hInst;							// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// The title bar text
-double scale = 2.0;
+double scale = 6;
 bool alias = true;
 
 // Foward declarations of functions included in this code module:
