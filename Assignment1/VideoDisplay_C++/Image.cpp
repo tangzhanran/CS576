@@ -54,6 +54,8 @@ MyImage & MyImage::operator= (const MyImage &otherImage)
 	Data = new char[Width*Height * 3];
 	strcpy((char *)otherImage.ImagePath, ImagePath);
 	//endpoints = otherImage.endpoints;
+	numoflines = otherImage.numoflines;
+	startrad = otherImage.startrad;
 
 	for (int i = 0; i < (Height*Width * 3); i++)
 	{
@@ -68,6 +70,7 @@ MyImage & MyImage::operator= (const MyImage &otherImage)
 // Function to create white image with two dots connected
 bool MyImage::CreatImageCanv(int n)
 {
+	numoflines = n;
 	// Allocate Data structure and copy
 	Data = new char[Width*Height * 3]; //BGR Order
 	for (int i = 0; i < Height*Width; i++)

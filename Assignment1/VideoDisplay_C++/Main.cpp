@@ -16,6 +16,7 @@
 
 #define MAX_LOADSTRING 100
 #define NUMOFLINES 8
+#define PI 3.1415926
 
 using namespace std;
 
@@ -26,12 +27,20 @@ TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// The title bar text
 double scale = 2.0;
 bool alias = true;
+CWinThread *ptrThread, *ptrThreadOut;
+HWND hWnd;
+RECT rt;
+double rpers = 4;
+double outfps = 11;
+double infps = 1000;
 
 // Foward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+UINT RotationThread(void* param);
+UINT RotationThreadOut(void* param);
 
 // Main entry point for a windows application
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -63,6 +72,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		else			
 		{
+			outImage = inImage;
+			ptrThread = AfxBeginThread(RotationThread, NULL);
+			ptrThreadOut = AfxBeginThread(RotationThreadOut, NULL);
 			/*outImage.setWidth(w / 2);
 			outImage.setHeight(h / 2);
 			outImage.setImagePath(ImagePath);
@@ -84,6 +96,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	hAccelTable = LoadAccelerators(hInstance, (LPCTSTR)IDC_IMAGE);
+
 
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0)) 
@@ -147,7 +160,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   HWND hWnd;
+   //HWND hWnd;
 
    hInst = hInstance; // Store instance handle in our global variable
 
@@ -186,7 +199,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	TCHAR szHello[MAX_LOADSTRING];
 	LoadString(hInst, IDS_HELLO, szHello, MAX_LOADSTRING);
-	RECT rt;
+	//RECT rt;
 	GetClientRect(hWnd, &rt);
 
 	switch (message) 
@@ -232,6 +245,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				bmi.bmiHeader.biCompression = BI_RGB;
 				bmi.bmiHeader.biSizeImage = inImage.getWidth()*inImage.getHeight();
 
+				
+				SetDIBitsToDevice(hdc,
+				0, 100, inImage.getWidth(), inImage.getHeight(),
+				0, 0, 0, inImage.getHeight(),
+				inImage.getImageData(), &bmi, DIB_RGB_COLORS);
+
 				BITMAPINFO o_bmi;
 				CBitmap o_bitmap;
 				memset(&o_bmi, 0, sizeof(o_bmi));
@@ -242,17 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				o_bmi.bmiHeader.biBitCount = 24;
 				o_bmi.bmiHeader.biCompression = BI_RGB;
 				o_bmi.bmiHeader.biSizeImage = outImage.getWidth()*outImage.getHeight();
-			
-				while (1)
-				{
-					SetDIBitsToDevice(hdc,
-						0, 100, inImage.getWidth(), inImage.getHeight(),
-						0, 0, 0, inImage.getHeight(),
-						inImage.getImageData(), &bmi, DIB_RGB_COLORS);
-					inImage.RotateImage(0.062831852, NUMOFLINES);
-					//Sleep(100);
-				}
-				
+						
 				SetDIBitsToDevice(hdc,
 								  inImage.getWidth()+50,100,outImage.getWidth(),outImage.getHeight(),
 								  0,0,0,outImage.getHeight(),
@@ -292,6 +301,32 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 	}
     return FALSE;
+}
+
+UINT RotationThread(void* param)
+{
+	GetClientRect(hWnd, &rt);
+	while (1)
+	{
+		inImage.RotateImage(rpers*2*PI/infps, NUMOFLINES);
+		InvalidateRect(hWnd, &rt, false);
+		Sleep(1000/infps);
+	}
+	
+	return 0;
+}
+
+UINT RotationThreadOut(void* param)
+{
+	GetClientRect(hWnd, &rt);
+	while (1)
+	{
+		outImage.RotateImage(rpers*2*PI/outfps, NUMOFLINES);
+		InvalidateRect(hWnd, &rt, false);
+		Sleep(1000/outfps);
+	}
+
+	return 0;
 }
 
 

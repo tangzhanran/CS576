@@ -37,6 +37,7 @@ private:
 	int		Height;					// Height of Image
 	char	ImagePath[_MAX_PATH];	// Image location
 	char*	Data;					// RGB data of the image
+	int numoflines;
 	//vector<pair<int, int>> endpoints;
 	//pair<int, int> startpoint;
 	double startrad;
@@ -63,6 +64,7 @@ public:
 	char*	getImagePath() { return ImagePath; }
 	void	clearData();
 	void	pushPoints(int x, int y);
+	int		getNumofLines() { return numoflines; };
 
 	// Input Output operations
 	bool	ReadImage();
